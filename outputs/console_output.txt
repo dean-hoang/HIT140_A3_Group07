@@ -1,0 +1,245 @@
+
+>>> running 01_build_datasets.py
+Group-stage scores reproduce all 12 official group tables.
+Built datasets:
+  2.1 goal difference : 104 rows x 8 explanatory variables
+  2.2 team goals      : 208 rows x 8 explanatory variables
+  total goals check   : 308 goals in 104 matches
+
+>>> running 02_regression_2_1_goal_difference.py
+
+======================================================================
+LR2.1: predicting 'goal_difference'  (n = 104, k = 8)
+======================================================================
+
+Descriptive statistics:
+                     count   mean     std     min     25%    50%     75%     max   skew
+fifa_rank_diff      104.0 -7.212  33.636 -77.000 -28.500 -6.500  14.000  76.000 -0.072
+log_value_ratio     104.0  0.349   1.677  -3.683  -0.818  0.508   1.345   4.272 -0.309
+avg_age_diff        104.0  0.023   1.487  -3.580  -1.048 -0.015   1.120   3.380 -0.035
+host_diff           104.0  0.067   0.376  -1.000   0.000  0.000   0.000   1.000  0.754
+wc_experience_diff  104.0  2.740   8.684 -18.000  -3.000  2.000  10.000  21.000 -0.098
+elite_conf_diff     104.0  0.154   0.747  -1.000   0.000  0.000   1.000   1.000 -0.259
+rest_days_diff      104.0  0.038   0.667  -1.000   0.000  0.000   0.000   3.000  0.957
+form_gd_pg_diff     104.0  0.242   1.851  -6.000   0.000  0.000   1.000   5.000 -0.336
+goal_difference     104.0  0.481   2.024  -4.000  -1.000  0.000   2.000   6.000  0.258
+
+Correlation of each predictor with the target:
+ log_value_ratio       0.662
+fifa_rank_diff       -0.621
+wc_experience_diff    0.533
+form_gd_pg_diff       0.318
+elite_conf_diff       0.316
+host_diff             0.123
+avg_age_diff         -0.081
+rest_days_diff        0.037
+
+VIF (>5 = concerning, >10 = serious):
+ log_value_ratio       7.42
+fifa_rank_diff        3.81
+wc_experience_diff    2.80
+elite_conf_diff       2.80
+avg_age_diff          1.98
+form_gd_pg_diff       1.48
+host_diff             1.44
+rest_days_diff        1.11
+
+Model A (all 8 predictors) - OLS on all rows:
+                       coef  std_err       t  p_value  ci_low  ci_high  std_coef
+const               0.1815   0.1552  1.1700   0.2449 -0.1265   0.4896       NaN
+fifa_rank_diff     -0.0065   0.0084 -0.7713   0.4424 -0.0232   0.0102   -0.1080
+log_value_ratio     1.0261   0.2360  4.3482   0.0000  0.5576   1.4946    0.8499
+avg_age_diff        0.3078   0.1375  2.2391   0.0275  0.0349   0.5807    0.2261
+host_diff           0.0121   0.4640  0.0262   0.9792 -0.9090   0.9333    0.0023
+wc_experience_diff  0.0046   0.0280  0.1646   0.8696 -0.0510   0.0602    0.0198
+elite_conf_diff    -0.7345   0.3250 -2.2596   0.0261 -1.3798  -0.0892   -0.2712
+rest_days_diff      0.2669   0.2298  1.1615   0.2484 -0.1893   0.7231    0.0880
+form_gd_pg_diff    -0.0988   0.0954 -1.0357   0.3030 -0.2881   0.0906   -0.0903
+{'n': 104, 'k': 8, 'R2': 0.5105, 'adj_R2': 0.4693, 'F': 12.3869, 'F_p_value': 0.0, 'RMSE_in_sample': 1.4092, 'residual_std_error': 1.4744, 'AIC': 89.3495}
+
+Backward elimination removed: ['host_diff', 'wc_experience_diff', 'fifa_rank_diff', 'form_gd_pg_diff', 'rest_days_diff']
+Model B (reduced) - OLS on all rows:
+                    coef  std_err       t  p_value  ci_low  ci_high  std_coef
+const            0.2017   0.1472  1.3704   0.1736 -0.0903   0.4936       NaN
+log_value_ratio  1.0885   0.1248  8.7205   0.0000  0.8409   1.3362    0.9017
+avg_age_diff     0.3205   0.1105  2.9009   0.0046  0.1013   0.5397    0.2355
+elite_conf_diff -0.7057   0.2648 -2.6647   0.0090 -1.2311  -0.1803   -0.2606
+{'n': 104, 'k': 3, 'R2': 0.4949, 'adj_R2': 0.4798, 'F': 32.6659, 'F_p_value': 0.0, 'RMSE_in_sample': 1.4315, 'residual_std_error': 1.4598, 'AIC': 82.6136}
+
+Hold-out (80/20) - Model A:
+                          R2    MSE   RMSE    MAE  NRMSE
+Model (train)         0.529  1.866  1.366  1.076  0.137
+Model (test)          0.284  3.176  1.782  1.445  0.223
+Baseline mean (test) -0.001  4.440  2.107  1.737  0.263
+Hold-out (80/20) - Model B:
+                          R2    MSE   RMSE    MAE  NRMSE
+Model (train)         0.488  2.029  1.424  1.149  0.142
+Model (test)          0.495  2.239  1.496  1.159  0.187
+Baseline mean (test) -0.001  4.440  2.107  1.737  0.263
+Repeated 10-fold CV - Model A:
+                 mean     sd
+CV R2          0.261  0.356
+CV RMSE        1.528  0.330
+CV MAE         1.216  0.299
+Baseline RMSE  1.981  0.450
+Baseline MAE   1.590  0.365
+Repeated 10-fold CV - Model B:
+                 mean     sd
+CV R2          0.336  0.310
+CV RMSE        1.455  0.306
+CV MAE         1.179  0.277
+Baseline RMSE  1.981  0.450
+Baseline MAE   1.590  0.365
+
+Model comparison:
+                     Model A (8 vars)  Model B (3 vars)
+Predictors                    8.0000            3.0000
+R2 (all data)                 0.5105            0.4949
+Adj R2                        0.4693            0.4798
+AIC                          89.3495           82.6136
+F p-value                     0.0000            0.0000
+Test R2                       0.2840            0.4952
+Test RMSE                     1.7821            1.4963
+Test MAE                      1.4448            1.1591
+Test NRMSE                    0.2228            0.1870
+Baseline test RMSE            2.1070            2.1070
+CV R2                         0.2610            0.3361
+CV RMSE                       1.5276            1.4546
+CV MAE                        1.2158            1.1792
+Baseline CV RMSE              1.9814            1.9814
+
+Residual diagnostics (Model A):
+ Shapiro-Wilk W       0.9896
+Shapiro-Wilk p       0.6017
+Breusch-Pagan LM    12.0119
+Breusch-Pagan p      0.1507
+
+>>> running 03_regression_2_2_team_goals.py
+
+======================================================================
+LR2.2: predicting 'goals'  (n = 208, k = 8)
+======================================================================
+
+Descriptive statistics:
+                       count    mean     std    min    25%     50%     75%     max   skew
+fifa_rank             208.0  27.760  22.945  1.000  8.750  22.500  41.000  85.000  0.855
+opp_fifa_rank         208.0  27.760  22.945  1.000  8.750  22.500  41.000  85.000  0.855
+log_market_value      208.0   5.553   1.200  2.992  4.935   5.807   6.380   7.326 -0.500
+opp_log_market_value  208.0   5.553   1.200  2.992  4.935   5.807   6.380   7.326 -0.500
+is_host               208.0   0.072   0.259  0.000  0.000   0.000   0.000   1.000  3.332
+is_knockout           208.0   0.308   0.463  0.000  0.000   0.000   1.000   1.000  0.839
+form_gf_pg            208.0   1.329   1.213  0.000  0.000   1.000   2.000   7.000  0.904
+opp_form_ga_pg        208.0   0.977   1.101  0.000  0.000   1.000   1.271   7.000  1.869
+goals                 208.0   1.481   1.393  0.000  0.000   1.000   2.000   7.000  1.149
+
+Correlation of each predictor with the target:
+ log_market_value        0.401
+fifa_rank              -0.367
+opp_fifa_rank           0.345
+opp_log_market_value   -0.317
+opp_form_ga_pg          0.148
+is_host                 0.104
+form_gf_pg              0.058
+is_knockout            -0.013
+
+VIF (>5 = concerning, >10 = serious):
+ log_market_value        3.16
+fifa_rank               3.06
+opp_log_market_value    3.02
+opp_fifa_rank           3.01
+form_gf_pg              1.53
+is_knockout             1.41
+opp_form_ga_pg          1.19
+is_host                 1.08
+
+Model A (all 8 predictors) - OLS on all rows:
+                         coef  std_err       t  p_value  ci_low  ci_high  std_coef
+const                -0.5864   1.1976 -0.4897   0.6249 -2.9481   1.7752       NaN
+fifa_rank            -0.0039   0.0063 -0.6221   0.5346 -0.0164   0.0085   -0.0647
+opp_fifa_rank         0.0109   0.0063  1.7377   0.0838 -0.0015   0.0233    0.1794
+log_market_value      0.4668   0.1229  3.7988   0.0002  0.2245   0.7091    0.4021
+opp_log_market_value -0.1162   0.1201 -0.9674   0.3345 -0.3531   0.1207   -0.1001
+is_host               0.5396   0.3329  1.6206   0.1067 -0.1170   1.1961    0.1004
+is_knockout          -0.1191   0.2130 -0.5590   0.5768 -0.5391   0.3009   -0.0395
+form_gf_pg           -0.1297   0.0844 -1.5363   0.1261 -0.2962   0.0368   -0.1129
+opp_form_ga_pg        0.0998   0.0820  1.2170   0.2250 -0.0619   0.2615    0.0789
+{'n': 208, 'k': 8, 'R2': 0.2949, 'adj_R2': 0.2666, 'F': 10.4035, 'F_p_value': 0.0, 'RMSE_in_sample': 1.1673, 'residual_std_error': 1.1934, 'AIC': 82.3369}
+
+Backward elimination removed: ['is_knockout', 'fifa_rank', 'opp_log_market_value', 'opp_form_ga_pg', 'form_gf_pg', 'is_host']
+Model B (reduced) - OLS on all rows:
+                     coef  std_err       t  p_value  ci_low  ci_high  std_coef
+const            -1.5619   0.4027 -3.8784   0.0001 -2.3559  -0.7679       NaN
+opp_fifa_rank     0.0199   0.0036  5.4817   0.0000  0.0127   0.0271    0.3279
+log_market_value  0.4484   0.0694  6.4583   0.0000  0.3115   0.5853    0.3863
+{'n': 208, 'k': 2, 'R2': 0.2682, 'adj_R2': 0.2611, 'F': 37.5655, 'F_p_value': 0.0, 'RMSE_in_sample': 1.1891, 'residual_std_error': 1.1978, 'AIC': 78.0669}
+
+Hold-out (80/20) - Model A:
+                          R2    MSE   RMSE    MAE  NRMSE
+Model (train)         0.301  1.452  1.205  0.934  0.172
+Model (test)          0.149  1.050  1.025  0.811  0.205
+Baseline mean (test) -0.126  1.389  1.179  0.984  0.236
+Hold-out (80/20) - Model B:
+                          R2    MSE   RMSE    MAE  NRMSE
+Model (train)         0.268  1.522  1.234  0.959  0.176
+Model (test)          0.180  1.012  1.006  0.782  0.201
+Baseline mean (test) -0.126  1.389  1.179  0.984  0.236
+Repeated 10-fold CV - Model A:
+                 mean     sd
+CV R2          0.104  0.380
+CV RMSE        1.211  0.247
+CV MAE         0.952  0.172
+Baseline RMSE  1.373  0.268
+Baseline MAE   1.118  0.178
+Repeated 10-fold CV - Model B:
+                 mean     sd
+CV R2          0.142  0.333
+CV RMSE        1.191  0.232
+CV MAE         0.935  0.165
+Baseline RMSE  1.373  0.268
+Baseline MAE   1.118  0.178
+
+Model comparison:
+                     Model A (8 vars)  Model B (2 vars)
+Predictors                    8.0000            2.0000
+R2 (all data)                 0.2949            0.2682
+Adj R2                        0.2666            0.2611
+AIC                          82.3369           78.0669
+F p-value                     0.0000            0.0000
+Test R2                       0.1489            0.1802
+Test RMSE                     1.0249            1.0058
+Test MAE                      0.8112            0.7816
+Test NRMSE                    0.2050            0.2012
+Baseline test RMSE            1.1786            1.1786
+CV R2                         0.1042            0.1423
+CV RMSE                       1.2113            1.1906
+CV MAE                        0.9516            0.9349
+Baseline CV RMSE              1.3734            1.3734
+
+Residual diagnostics (Model A):
+ Shapiro-Wilk W       0.9759
+Shapiro-Wilk p       0.0012
+Breusch-Pagan LM    27.2537
+Breusch-Pagan p      0.0006
+
+Model C - log(1 + goals) target, all 8 predictors:
+                         coef  std_err       t  p_value  ci_low  ci_high  std_coef
+const                -0.0042   0.4837 -0.0086   0.9931 -0.9579   0.9496       NaN
+fifa_rank            -0.0016   0.0026 -0.6359   0.5256 -0.0067   0.0034   -0.0673
+opp_fifa_rank         0.0041   0.0025  1.6005   0.1111 -0.0009   0.0090    0.1679
+log_market_value      0.1740   0.0496  3.5074   0.0006  0.0762   0.2719    0.3773
+opp_log_market_value -0.0471   0.0485 -0.9709   0.3328 -0.1428   0.0486   -0.1021
+is_host               0.2367   0.1345  1.7607   0.0798 -0.0284   0.5019    0.1109
+is_knockout          -0.0249   0.0860 -0.2895   0.7725 -0.1945   0.1447   -0.0208
+form_gf_pg           -0.0335   0.0341 -0.9834   0.3266 -0.1008   0.0337   -0.0735
+opp_form_ga_pg        0.0260   0.0331  0.7851   0.4334 -0.0393   0.0913    0.0517
+Model C evaluation (predictions back-transformed to goals):
+ R2 on log scale                   0.2716
+Adj R2 on log scale               0.2423
+Test R2 (goals)                   0.2471
+Test RMSE (goals)                 0.9639
+Test MAE (goals)                  0.7263
+Test NRMSE (goals)                0.1928
+CV R2 (goals)                     0.0926
+CV RMSE (goals)                   1.2365
+CV MAE (goals)                    0.9498
+Shapiro-Wilk p (log residuals)    0.0211

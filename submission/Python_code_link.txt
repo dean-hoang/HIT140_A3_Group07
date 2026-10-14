@@ -1,0 +1,6 @@
+HIT140 Assessment 3 - Sydney Group 07
+Python code and datasets (Objective 2):
+[PASTE YOUR GITHUB / ONEDRIVE / BITBUCKET URL HERE]
+
+The repository contains all Python files (src/, run_all.py) and the datasets
+(data/raw, data/processed). Run:  pip install -r requirements.txt  then  python run_all.py
