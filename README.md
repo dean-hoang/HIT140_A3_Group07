@@ -28,13 +28,25 @@ src/
   regression_helpers.py                  OLS inference, VIF, backward elimination, evaluation, plots
   02_regression_2_1_goal_difference.py   Linear Regression 2.1
   03_regression_2_2_team_goals.py        Linear Regression 2.2
+  04_check_no_leakage.py                 independent check that no variable uses in-match data (Duong)
   optional_verify_with_statsmodels.py    cross-check against statsmodels (if installed)
-outputs/tables/      CSV results (descriptives, VIF, coefficients, model comparison, diagnostics)
+  review_2_2.py                          Model 2.2 robustness checks: robust/clustered SEs, Model B
+                                         diagnostics, selection stability, Poisson model (Yonish)
+  cv_compare.py                          repeated CV split by row vs by match (Yonish)
+review/FINDINGS.md   Model 2.2 review findings; full output in review/review_output.txt
+outputs/tables/      CSV results (descriptives, VIF, coefficients, model comparison, diagnostics
+                     for Model A and Model B, leakage check)
 outputs/figures/     PNG figures for the report
 outputs/console_output.txt   full printed output of run_all.py
 submission/          report template (.docx), AI declaration form, code-link .txt, checklist
   build_report_template.js   regenerates the report template from outputs/figures
   HIT140_A3_Group07_Slides.pptx + build_slides.js   11-slide summary deck (optional supporting material)
+```
+
+Optional 2.2 review checks (need statsmodels):
+```bash
+python src/review_2_2.py data/processed/dataset_2_2_team_goals.csv
+python src/cv_compare.py data/processed/dataset_2_2_team_goals.csv
 ```
 
 ## Method summary
