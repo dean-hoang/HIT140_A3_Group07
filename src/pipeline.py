@@ -117,6 +117,16 @@ def run_task(tag, csv_name, features, target, target_label, stratify_col=None):
                       "Breusch-Pagan LM": bp_lm, "Breusch-Pagan p": bp_p})
     diag.to_csv(TAB / f"{tag}_diagnostics.csv")
     print("\nResidual diagnostics (Model A):\n", diag.round(4).to_string())
+
+    # 7b. Residual diagnostics (Model B), same tests on the reduced model -------
+    sw_b = stats.shapiro(resid_b)
+    _, bp_fit_b, *_ = rh.ols_summary(X[kept], pd.Series(resid_b ** 2))
+    bp_lm_b = len(y) * bp_fit_b["R2"]
+    diag_b = pd.Series({"Shapiro-Wilk W": sw_b.statistic, "Shapiro-Wilk p": sw_b.pvalue,
+                        "Breusch-Pagan LM": bp_lm_b,
+                        "Breusch-Pagan p": stats.chi2.sf(bp_lm_b, df=len(kept))})
+    diag_b.to_csv(TAB / f"{tag}_diagnostics_modelB.csv")
+    print("\nResidual diagnostics (Model B):\n", diag_b.round(4).to_string())
     rh.plot_diagnostics(fitted_a, resid_a, yte_a, ypred_a, f"{tag} Model A diagnostics",
                         target_label, FIG / f"{tag}_diagnostics.png")
 
