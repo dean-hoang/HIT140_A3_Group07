@@ -48,6 +48,10 @@ named = set(matches["team1"]) | set(matches["team2"])
 missing = named - set(teams["team"])
 assert not missing, f"Team names not found in team_profiles.csv: {missing}"
 
+# Score convention: goals1/goals2 include extra time but NOT penalty shoot-outs.
+# A shoot-out is recorded as a draw (goal difference 0), because shoot-out kicks
+# are not goals and do not reflect how the teams played over 90-120 minutes.
+
 # Sanity check: rebuild each group table from the scores (GF/GA/Pts should
 # match the official group tables we transcribed the scores from).
 group_games = matches[matches["stage"].str.startswith("Group")]
@@ -83,7 +87,17 @@ long = long[["match_id", "date", "stage", "side", "team", "opponent",
              "goals_for", "goals_against", "extra_time"]]
 long = long.sort_values(["team", "date"]).reset_index(drop=True)
 
-# --- Pre-match form: uses only the team's EARLIER matches (shift(1)) ---
+# --- Pre-match form: uses only the team's EARLIER matches ---
+# For each team (rows sorted by date), cumsum() gives the running total of goals
+# INCLUDING the current match. Subtracting the current match's goals leaves only
+# the goals from earlier matches, so the result of the match we are predicting
+# (and of any later match) is never used.
+# Example: a team scores 2, 0, 3 goals in its first three matches.
+#   cumsum            = 2, 2, 5
+#   minus this match  = 0, 2, 2   -> goals scored BEFORE each match
+#   matches played    = 0, 1, 2   -> form_gf_pg = 0 (no games yet), 2.0, 1.0
+# A team's first match has no earlier games, so its form is set to 0.
+# src/04_check_no_leakage.py recomputes every value independently to confirm this.
 g = long.groupby("team")
 long["prior_games"] = g.cumcount()                        # matches already played
 long["prior_gf"] = g["goals_for"].cumsum() - long["goals_for"]
