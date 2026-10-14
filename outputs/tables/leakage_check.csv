@@ -1,0 +1,7 @@
+check,result,detail
+1. Static team variables are constant across the tournament,PASS,0 team/variable combinations change value (should be 0)
+2a. LR2.2 form variables use only earlier matches,PASS,0 of 208 rows differ from the strict earlier-date recomputation
+2b. LR2.1 form variable uses only earlier matches,PASS,0 of 104 rows differ from the strict earlier-date recomputation
+3. Form = 0 for every team's first match,PASS,"48 first-match rows found (expected 48), 0 with non-zero form"
+4. No target or raw score column used as a predictor,PASS,score-type columns among predictors: none
+"5. 104 / 208 rows, exactly 8 explanatory variables each",PASS,2.1: 104 rows x 8 vars; 2.2: 208 rows x 8 vars
