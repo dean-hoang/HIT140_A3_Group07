@@ -1,0 +1,114 @@
+====================================================================== 
+1. STANDARD ERRORS: classical vs HC3 vs clustered by match
+======================================================================
+
+Model A
+                         coef  p_classical   p_HC3  p_cluster  CI_cluster_low  CI_cluster_high
+fifa_rank            -0.0039       0.5346  0.4319     0.4313         -0.0137           0.0059
+opp_fifa_rank         0.0109       0.0838  0.1407     0.1264         -0.0031           0.0249
+log_market_value      0.4668       0.0002  0.0000     0.0000          0.2497           0.6839
+opp_log_market_value -0.1162       0.3345  0.3929     0.3820         -0.3768           0.1443
+is_host               0.5396       0.1067  0.1475     0.1310         -0.1608           1.2400
+is_knockout          -0.1191       0.5768  0.5335     0.5703         -0.5303           0.2921
+form_gf_pg           -0.1297       0.1261  0.1626     0.1327         -0.2987           0.0393
+opp_form_ga_pg        0.0998       0.2250  0.4690     0.4134         -0.1394           0.3390
+
+Model B
+                     coef  p_classical  p_HC3  p_cluster  CI_cluster_low  CI_cluster_high
+opp_fifa_rank     0.0199          0.0    0.0        0.0          0.0110           0.0289
+log_market_value  0.4484          0.0    0.0        0.0          0.3105           0.5863
+
+====================================================================== 
+2. DIAGNOSTICS ON MODEL B (report only shows Model A)
+======================================================================
+Shapiro-Wilk W = 0.9713, p = 0.0003
+Breusch-Pagan LM = 22.146, p = 1.553e-05
+Cook's D > 4/n: 11 rows
+ match_id       stage    team   opponent  goals  fitted  cooks
+        9     Group E Germany    Curacao      7   3.144  0.135
+      103 Third place England     France      6   1.733  0.090
+       47     Group L England      Ghana      0   3.127  0.077
+       34     Group E Ecuador    Curacao      0   2.721  0.059
+       15     Group H   Spain Cape Verde      0   2.959  0.056
+Negative fitted values (impossible goals): 2 rows, min = -0.19
+
+====================================================================== 
+3. ROWS OF ONE MATCH SPLIT ACROSS TRAIN/TEST
+======================================================================
+Current 80/20 row split: 30 matches have one row in train and its mirror in test
+Repeated CV by row vs by match: run cv_compare.py
+
+====================================================================== 
+4. IS MODEL B's CV SCORE OPTIMISTIC? (selection inside each fold)
+======================================================================
+B's 2 vars fixed in advance : CV R2 = 0.193, RMSE = 1.190
+Elimination redone per fold : CV R2 = 0.155, RMSE = 1.217
+Most common variable sets chosen across 200 folds:
+(log_market_value, opp_fifa_rank)                                         0.820
+(log_market_value, opp_log_market_value)                                  0.105
+(form_gf_pg, is_host, log_market_value, opp_fifa_rank, opp_form_ga_pg)    0.035
+(form_gf_pg, log_market_value, opp_fifa_rank, opp_form_ga_pg)             0.015
+(form_gf_pg, is_host, log_market_value, opp_fifa_rank)                    0.010
+Share of folds keeping each variable:
+fifa_rank               0.00
+opp_fifa_rank           0.89
+log_market_value        1.00
+opp_log_market_value    0.11
+is_host                 0.04
+is_knockout             0.00
+form_gf_pg              0.07
+opp_form_ga_pg          0.06
+
+====================================================================== 
+5. FIRST-MATCH FORM = 0 (cannot tell 'not played' from 'scored 0')
+======================================================================
+Rows that are a team's first match: 48 of 208
+form_gf_pg == 0 overall: 60, of which first matches: 48
+Model A + first_match flag (sensitivity only, not a 9th reported variable):
+form_gf_pg       -0.107
+opp_form_ga_pg    0.121
+first_match       0.125
+form_gf_pg        0.245
+opp_form_ga_pg    0.378
+first_match       0.688
+
+====================================================================== 
+6. INTERPRETATION HELPERS (Model B)
+======================================================================
+log_market_value coef 0.448: doubling squad value -> +0.31 goals; +10% value -> +0.043 goals
+opp_fifa_rank coef 0.0199: opponent 10 places weaker -> +0.20; 50 places -> +1.00 goals
+Std coefs (SD units): value 0.39, opp rank 0.33
+In-sample: within 1 goal = 62.0%
+
+====================================================================== 
+7. WORKED EXAMPLE: THE FINAL (Model B fitted on all data)
+======================================================================
+     team  opponent  fifa_rank  opp_fifa_rank  log_market_value  goals  pred
+Argentina     Spain          1              2              6.69      0  1.48
+    Spain Argentina          2              1              7.11      1  1.64
+
+====================================================================== 
+8. IMPLIED GOAL DIFFERENCE FROM 2.2 vs ACTUAL
+======================================================================
+Implied GD (Model B, in-sample): R2 = 0.467, RMSE = 1.490
+(Compare with 2.1 Model B in-sample R2 = 0.495. Row order differs from 2.1's team1/team2, but R2/RMSE of a difference are order-invariant.)
+
+====================================================================== 
+9. POISSON ROBUSTNESS (same 8 vars, clustered SEs)
+======================================================================
+Dispersion = 0.89
+                        coef       p  rate_ratio
+fifa_rank            -0.0037  0.4318      0.9963
+opp_fifa_rank         0.0062  0.1207      1.0062
+log_market_value      0.3554  0.0001      1.4267
+opp_log_market_value -0.0863  0.3031      0.9174
+is_host               0.4156  0.0274      1.5152
+is_knockout          -0.0481  0.7399      0.9531
+form_gf_pg           -0.0776  0.1464      0.9253
+opp_form_ga_pg        0.0515  0.4316      1.0529
+--- cv_compare.py ---
+model    split  mean_fold_R2  mean_fold_RMSE  pooled_R2  pooled_RMSE
+    A   by row         0.149           1.209      0.214        1.233
+    A by match         0.153           1.216      0.206        1.239
+    B   by row         0.185           1.188      0.244        1.209
+    B by match         0.179           1.191      0.241        1.211
