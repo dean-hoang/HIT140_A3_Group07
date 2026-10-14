@@ -114,6 +114,12 @@ Shapiro-Wilk p       0.6017
 Breusch-Pagan LM    12.0119
 Breusch-Pagan p      0.1507
 
+Residual diagnostics (Model B):
+ Shapiro-Wilk W      0.9913
+Shapiro-Wilk p      0.7503
+Breusch-Pagan LM    5.6178
+Breusch-Pagan p     0.1318
+
 >>> running 03_regression_2_2_team_goals.py
 
 ======================================================================
@@ -221,6 +227,12 @@ Shapiro-Wilk p       0.0012
 Breusch-Pagan LM    27.2537
 Breusch-Pagan p      0.0006
 
+Residual diagnostics (Model B):
+ Shapiro-Wilk W       0.9713
+Shapiro-Wilk p       0.0003
+Breusch-Pagan LM    22.1458
+Breusch-Pagan p      0.0000
+
 Model C - log(1 + goals) target, all 8 predictors:
                          coef  std_err       t  p_value  ci_low  ci_high  std_coef
 const                -0.0042   0.4837 -0.0086   0.9931 -0.9579   0.9496       NaN
@@ -243,3 +255,14 @@ CV R2 (goals)                     0.0926
 CV RMSE (goals)                   1.2365
 CV MAE (goals)                    0.9498
 Shapiro-Wilk p (log residuals)    0.0211
+
+>>> running 04_check_no_leakage.py
+                                                      check result                                                          detail
+1. Static team variables are constant across the tournament   PASS         0 team/variable combinations change value (should be 0)
+          2a. LR2.2 form variables use only earlier matches   PASS 0 of 208 rows differ from the strict earlier-date recomputation
+          2b. LR2.1 form variable uses only earlier matches   PASS 0 of 104 rows differ from the strict earlier-date recomputation
+                   3. Form = 0 for every team's first match   PASS   48 first-match rows found (expected 48), 0 with non-zero form
+       4. No target or raw score column used as a predictor   PASS                       score-type columns among predictors: none
+    5. 104 / 208 rows, exactly 8 explanatory variables each   PASS                  2.1: 104 rows x 8 vars; 2.2: 208 rows x 8 vars
+
+ALL CHECKS PASSED
